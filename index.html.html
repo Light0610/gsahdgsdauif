@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Connect Portal</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url(https://www.icegif.com/wp-content/uploads/2023/02/icegif-1117.gif);
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        #logo {
+            max-width: 100px;
+            margin-bottom: 20px;
+        }
+        .wifiName {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink {
+            50%, 100% {
+                color: red;
+            }
+            50% {
+                color: blue;
+            }
+        }
+        .loginButton {
+            background-color: #3498db;
+            color: #fff;
+            padding: 14px 24px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .loginButton:hover {
+            background-color: #2980b9;
+        }
+        .dropdown {
+            width: 50%;
+            padding: 14px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(50% - 20px);
+            padding: 14px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+        select {
+            width: 50%;
+            padding: 14px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #timer {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img id="logo" src="https://i.pinimg.com/originals/6e/cb/12/6ecb12077eeb2f6189f7ee76053a5981.png" alt="Wifi Logo">
+        <h1> Welcome to</h1>
+        <h1 class="wifiName">CLOUD CONNECT HOTSPOT</h1>
+        <h1 class="wifiName">PISO WIFI!</h1>
+        <p>Please choose your login method:</p>
+        <select id="loginMethod" class="dropdown">
+            <option value="voucher" style="background-color: #4CAF50; color: white; text-align: center;">Voucher Code</option>
+            <option value="local" style="background-color: #4CAF50; color: white; text-align: center;">Local User</option>
+        </select>
+        <div id="voucherCode" style="display: none;">
+            <input type="text" id="voucherInput" placeholder="Enter Code"><br>
+            <button class="loginButton" onclick="validateVoucher()">Login</button>
+        </div>
+        <div id="localUser" style="display: none;">
+            <input type="text" id="usernameInput" placeholder="Username"><br>
+            <input type="password" id="passwordInput" placeholder="Password"><br>
+            <button class="loginButton" onclick="loginLocalUser()">Login</button>
+        </div>
+        <div id="timer" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById("loginMethod").addEventListener("change", function() {
+            var loginMethod = this.value;
+            if (loginMethod === "voucher") {
+                document.getElementById("voucherCode").style.display = "block";
+                document.getElementById("localUser").style.display = "none";
+            } else if (loginMethod === "local") {
+                document.getElementById("voucherCode").style.display = "none";
+                document.getElementById("localUser").style.display = "block";
+            }
+        });
+
+        function validateVoucher() {
+            var voucherCode = document.getElementById("voucherInput").value;
+
+            // Make API request to validate voucher code
+            fetch('https://aps1-omada-cloud.tplinkcloud.com/omada/5.13.23/?deviceId=7B06952AC063597492AB1F47C671B5CB0C92AA&omadacId=1f967fe4a11a8bcfcc8f410737486f29#hotspot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any necessary authentication headers
+                },
+                body: JSON.stringify({ voucherCode: voucherCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle response from Omada Cloud Controller
+                if (data.valid) {
+                    alert("Voucher code is valid!");
+                    startTimer();
+                } else {
+                    alert("Invalid voucher code. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while validating voucher code.");
+            });
+        }
+
+        function loginLocalUser() {
+            var username = document.getElementById("usernameInput").value;
+            var password = document.getElementById("passwordInput").value;
+            // Placeholder login logic
+            if (username === "Light_10" && password === "Gravity0123") {
+                alert("Logged in successfully!"); // Placeholder alert
+                startTimer();
+            } else {
+                alert("Invalid username or password. Please try again."); // Placeholder alert
+            }
+        }
+
+        function startTimer() {
+            var timerDisplay = document.getElementById("timer");
+            var duration = 5; // 5 seconds
+            var timer = duration, seconds;
+            var countdownInterval = setInterval(function () {
+                seconds = parseInt(timer % 60, 10);
+
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerDisplay.textContent = "00:" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(countdownInterval);
+                    timerDisplay.textContent = "";
+                }
+            }, 1000);
+            timerDisplay.style.display = "block";
+        }
+    </script>
+
+    <footer style="text-align: center; margin-top: 20px; color: #666; font-weight: bold;">Copyright © 2023 TP-Link Corporation Limited. All rights reserved.</footer>
+</body>
+</html>
